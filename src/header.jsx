@@ -24,14 +24,15 @@ state = {
   cart: false,
   subtotal: '',
   inputVal: '',
-  cartArr: []
+  prodArr: [],
+  cartArr: [],
+  hightolow: false,
+  lowtohigh: false
 }
 
-// componentDidMount() {
-//   const cartData = this.state.cartArr.length > 0 && ProductArr.filter(item => this.state.cartArr.indexOf(item.id) !== -1);
-//   const subtotal = this.state.cartArr.length > 0 && cartData.reduce( ( sum, { price } ) => sum + parseInt(price), 0 );
-//   const totalqty = this.state.cartArr.length > 0 && this.state.cartArr.length;
-// }
+componentDidMount() {
+  this.setState({prodArr: ProductArr})
+}
 
 clickMe = (id) => {
   this.setState({
@@ -62,7 +63,7 @@ removeMe = (id) => {
   // eslint-disable-next-line no-restricted-globals
   let conf = confirm("Are You Sure You Wanna Remove This Product");
   if (conf === true) {
-    this.setState({cartArr: this.state.cartArr.filter(item => item !== id)});
+    this.setState({cartArr: this.state.cartArr.filter(item => item.id !== id)});
   }
 }
 
@@ -74,22 +75,45 @@ checkOut = () => {
 
 decreseCnt = (index) => {
   const myIdex = this.state.cartArr[index];
-  myIdex.qty = myIdex.qty - 1;
-  myIdex.price = myIdex.price * myIdex.qty;
-  console.log(myIdex);
+  if (myIdex.qty < 1) {
+    // myIdex.qty = myIdex.qty - 1;
+    // this.setState({cartArr: [...this.state.cartArr, myIdex]})
+  } else {
+    alert('Qty cannot less than 1');
+  }
 }
 
 increseCnt = (index) => {
-  const myIdex = this.state.cartArr[index];
-  myIdex.qty = myIdex.qty + 1;
-  myIdex.price = myIdex.price * myIdex.qty;
-  this.setState({cartArr: [...this.state.cartArr, ...myIdex]})
+  // const objIndex = this.state.cartArr.findIndex((obj => obj.id === index));
+  // myArray[objIndex].qty = myArray[objIndex].qty+1;
+  // this.setState({cartArr: myArray})
 }
 
-render() {
+searchText = (e) => {
+  const searchTerm = e.target.value;
+  if (searchTerm.length > 0) {
+    this.setState({prodArr: ProductArr.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))});
+  } else {
+    this.setState({prodArr: ProductArr})
+  }
+}
 
-  const { cartArr, subtotal } = this.state;
-  console.log(cartArr);
+priceLowToHigh = () => {
+  const priceLowToHigh = this.state.prodArr;
+  priceLowToHigh.sort((a,b) => (a.price < b.price) ? -1 : (a.price > b.price ? 1 : 0))
+  this.setState({prodArr: priceLowToHigh, lowtohigh: true, hightolow: false })
+}
+priceHighToLow = () => {
+  const priceLowToHigh = this.state.prodArr;
+  priceLowToHigh.sort((a,b) => (a.price > b.price) ? -1 : (a.price < b.price ? 1 : 0))
+  this.setState({prodArr: priceLowToHigh, lowtohigh: false, hightolow: true })
+}
+
+
+render() {
+const { cartArr, subtotal, prodArr } = this.state;
+const lowtohigh = this.state.lowtohigh ? "cornflowerblue" : "blackcolor";
+const hightolow = this.state.hightolow ? "cornflowerblue" : "blackcolor";
 
 return (
 
@@ -97,19 +121,26 @@ return (
   <div className="page-title">
     <span style={{float: 'left', cursor: 'pointer'}} onClick={this.gotoHome}>HOME</span>
     <span style={{float: 'right', cursor: 'pointer'}} onClick={this.gotoCart}>CART({this.state.cartArr.length})</span>
+    <input type="text" style={{float: 'right', paddingLeft: '5px', marginRight: '10px'}} placeholder="search product" onChange={this.searchText} />
   </div>
   {this.state.home === true && (
   <div>
   <div className="product-filter">
     <div className="filter-info">
       <h5>Filters</h5>
+      <input style={{width: '70px', fontSize: '12px'}} type="text" placeholder="Min: 100" />
+      -
+      <input type="text" placeholder="Max: 999" style={{width: '70px', fontSize: '12px'}} />
+      <button style={{width: '70px', marginLeft: '10px'}} onClick={this.seachProductbyPrice}>search</button>
     </div>
   </div>
   <div className="products-grid">
     <div className="product-sort">
-
+    <span style={{fontWeight: '600'}} >Sort:</span>
+    <span onClick={this.priceLowToHigh} className={lowtohigh}>Price: Low to High</span>
+    <span onClick={this.priceHighToLow} className={hightolow}>Price: High to Low</span>
     </div>
-    {ProductArr.map((items) => (
+    {prodArr.map((items) => (
     <div className="product-card" key={items.id}>
       <div className="product-image">
         <img src={items.img} alt={items.name}/>
@@ -117,7 +148,7 @@ return (
       <div className="product-info">
         <h5>{items.name}</h5>
         <h6>${items.price}.00</h6>
-        <button onClick={() => this.clickMe(items.id)} disabled={this.state.cartArr.indexOf(items.id) !== -1}>Add To Cart</button>
+        <button onClick={() => this.clickMe(items.id)} disabled={this.state.cartArr.findIndex(x => x.id === items.id) !== -1}>Add To Cart</button>
       </div>
     </div>
     ))}
@@ -172,7 +203,7 @@ return (
     </div>
     )}
     
-    { !cartArr && (
+    { cartArr.length === 0 && (
       <div >
         <span>Oops!! Your cart is empty.</span>
       </div>
