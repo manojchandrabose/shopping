@@ -15,10 +15,11 @@
     margin-top: 20px;
 }
 button {
-    border-radius: 25%;
+    border-radius: 32px;
     cursor: pointer;
     border: 1px solid orange;
     background-color: orange;
+    padding: 5px 15px;
 }
 .product-card {
     width: 25%;
@@ -35,7 +36,15 @@ margin-top: auto;
     float: left;
     background: cornflowerblue;
     color: white;
-    padding: 20px;
+    padding: 10px;
+}
+.copyright {
+    width: 100%;
+    float: left;
+    background: cornflowerblue;
+    color: white;
+    padding: 10px;
+    text-align: center;
 }
 .price-details {
     width: 20%;
@@ -51,6 +60,7 @@ margin-top: auto;
 .cornflowerblue {
     color: cornflowerblue;
     font-weight: 600;
+    border-bottom: 2px solid cornflowerblue
 }
 .blackcolor {
     color: black;
@@ -58,6 +68,14 @@ margin-top: auto;
 .product-sort span {
     margin-right: 1rem;
     cursor: pointer;
+}
+.addcart-msg {
+    background-color: beige;
+    width: 95%;
+    /* height: 50px; */
+    padding: 15px;
+    border-left: 5px solid green;
+    margin-bottom: 15px;
 }
 @media (max-width: 920px) {
 .product-card {

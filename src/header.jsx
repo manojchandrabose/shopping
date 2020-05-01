@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
+import star from './star.png';
+import cart from './cart.png';
 
 const imgUrl = `${'https://i.picsum.photos/id/'}_id_${'/200/200.jpg'}`;
 
@@ -12,7 +14,8 @@ Arr.map((item) => {
     name: `${'Product'}${item}`, 
     price: Math.floor(Math.random()*(999-100+1)+100),
     img: imgUrl.replace(/_id_/gi, item),
-    qty: 1
+    qty: 1,
+    discount: Math.floor(Math.random()*(50-10+1)+10)
   });
 
 });
@@ -27,7 +30,10 @@ state = {
   prodArr: [],
   cartArr: [],
   hightolow: false,
-  lowtohigh: false
+  lowtohigh: false,
+  cartmsg: false,
+  minprice: 100,
+  maxprice: 1000
 }
 
 componentDidMount() {
@@ -39,24 +45,29 @@ clickMe = (id) => {
     cartArr: [...this.state.cartArr, ...ProductArr.filter(item => item.id === id)]
   }, () => this.setState({subtotal: this.state.cartArr.reduce( ( sum, { price } ) => sum + parseInt(price), 0 )}));
   setTimeout(() => {
-    alert('Product Added To Cart Sucessfully!!')
+    this.setState({cartmsg: true})
   }, 500);
+  setTimeout(() => {
+    this.setState({cartmsg: false})
+  }, 3000);
 }
 
 gotoCart = () => {
   // eslint-disable-next-line no-restricted-globals
-  let conf = confirm("Are You Sure You Wanna Go To Cart");
-  if (conf === true) {
-    this.setState({cart: true, home: false});
-  }
+  // let conf = confirm("Are You Sure You Wanna Go To Cart");
+  // if (conf === true) {
+  //   this.setState({cart: true, home: false});
+  // }
+  this.setState({cart: true, home: false});
 }
 
 gotoHome = () => {
   // eslint-disable-next-line no-restricted-globals
-  let conf = confirm("Are You Sure You Wanna Go To Home");
-  if (conf === true) {
-    this.setState({cart: false, home: true});
-  }
+  // let conf = confirm("Are You Sure You Wanna Go To Home");
+  // if (conf === true) {
+  //   this.setState({cart: false, home: true});
+  // }
+  this.setState({cart: false, home: true});
 }
 
 removeMe = (id) => {
@@ -75,18 +86,27 @@ checkOut = () => {
 
 decreseCnt = (index) => {
   const myIdex = this.state.cartArr[index];
-  if (myIdex.qty < 1) {
-    // myIdex.qty = myIdex.qty - 1;
-    // this.setState({cartArr: [...this.state.cartArr, myIdex]})
+  console.log(myIdex.qty);
+  if (myIdex.qty > 1) {
+    const updatedcartArr = this.state.cartArr;
+    updatedcartArr[index].qty = parseInt(updatedcartArr[index].qty) - 1;
+    this.setState({cartArr: updatedcartArr
+    }, this.updatePrice('decreseCnt'));
   } else {
     alert('Qty cannot less than 1');
   }
 }
 
 increseCnt = (index) => {
-  // const objIndex = this.state.cartArr.findIndex((obj => obj.id === index));
-  // myArray[objIndex].qty = myArray[objIndex].qty+1;
-  // this.setState({cartArr: myArray})
+  const updatedcartArr = this.state.cartArr;
+  updatedcartArr[index].qty = parseInt(updatedcartArr[index].qty) + 1;
+  this.setState({cartArr: updatedcartArr
+  }, this.updatePrice('increseCnt'));
+}
+
+updatePrice = (cnt) => {
+  console.log(cnt);
+  this.setState({subtotal: this.state.cartArr.reduce( ( sum, { price } ) => sum + parseInt(price), 0 )});
 }
 
 searchText = (e) => {
@@ -101,44 +121,82 @@ searchText = (e) => {
 priceLowToHigh = () => {
   const priceLowToHigh = this.state.prodArr;
   priceLowToHigh.sort((a,b) => (a.price < b.price) ? -1 : (a.price > b.price ? 1 : 0))
-  this.setState({prodArr: priceLowToHigh, lowtohigh: true, hightolow: false })
+  this.setState({prodArr: priceLowToHigh, lowtohigh: true, hightolow: false, discountby: false })
 }
 priceHighToLow = () => {
   const priceLowToHigh = this.state.prodArr;
   priceLowToHigh.sort((a,b) => (a.price > b.price) ? -1 : (a.price < b.price ? 1 : 0))
-  this.setState({prodArr: priceLowToHigh, lowtohigh: false, hightolow: true })
+  this.setState({prodArr: priceLowToHigh, lowtohigh: false, hightolow: true, discountby: false })
+}
+discountFilter = () => {
+  const priceByDiscount = this.state.prodArr;
+  priceByDiscount.sort((a,b) => (a.discount > b.discount) ? -1 : (a.discount < b.discount ? 1 : 0))
+  this.setState({prodArr: priceByDiscount, lowtohigh: false, hightolow: false, discountby: true })
 }
 
+selectMinChange = (e) => {
+  this.setState({minprice: e.target.value})
+}
+selectMaxChange = (e) => {
+  this.setState({maxprice: e.target.value})
+}
+
+seachProductbyPrice = () => {
+  const { minprice, maxprice } = this.state;
+  this.setState({prodArr: ProductArr.filter(item => item.price >= minprice && item.price <= maxprice)})
+}
 
 render() {
-const { cartArr, subtotal, prodArr } = this.state;
+const { cartArr, subtotal, prodArr, cartmsg } = this.state;
 const lowtohigh = this.state.lowtohigh ? "cornflowerblue" : "blackcolor";
 const hightolow = this.state.hightolow ? "cornflowerblue" : "blackcolor";
+const discountby = this.state.discountby ? "cornflowerblue" : "blackcolor";
 
 return (
 
 <div className="products">
   <div className="page-title">
-    <span style={{float: 'left', cursor: 'pointer'}} onClick={this.gotoHome}>HOME</span>
-    <span style={{float: 'right', cursor: 'pointer'}} onClick={this.gotoCart}>CART({this.state.cartArr.length})</span>
-    <input type="text" style={{float: 'right', paddingLeft: '5px', marginRight: '10px'}} placeholder="search product" onChange={this.searchText} />
+    <img src={star} alt="Home" onClick={this.gotoHome} style={{width: '50px', cursor: 'pointer'}} />
+    <img src={cart} alt="Cart" onClick={this.gotoCart} style={{float: 'right', width: '50px', cursor: 'pointer'}} />
+    <span style={{cursor: 'pointer', float: 'right', position: 'relative', top: '10px', left: '35px'}}>{this.state.cartArr.length}</span>
+    <input type="text" style={{float: 'right', padding: '5px', margin: '5px 0px'}} placeholder="search product" onChange={this.searchText} />
   </div>
   {this.state.home === true && (
   <div>
   <div className="product-filter">
     <div className="filter-info">
       <h5>Filters</h5>
-      <input style={{width: '70px', fontSize: '12px'}} type="text" placeholder="Min: 100" />
+      {/* <input style={{width: '70px', fontSize: '12px'}} type="text" placeholder="Min: 100" /> */}
+      <select onChange={this.selectMinChange}>
+        <option value="100">100</option>
+        <option value="200">199</option>
+        <option value="300">299</option>
+        <option value="400">399</option>
+        <option value="500">499</option>
+      </select>
       -
-      <input type="text" placeholder="Max: 999" style={{width: '70px', fontSize: '12px'}} />
-      <button style={{width: '70px', marginLeft: '10px'}} onClick={this.seachProductbyPrice}>search</button>
+      {/* <input type="text" placeholder="Max: 999" style={{width: '70px', fontSize: '12px'}} /> */}
+      <select onChange={this.selectMaxChange}>
+        <option value="600">599</option>
+        <option value="700">699</option>
+        <option value="800">799</option>
+        <option value="900">899</option>
+        <option value="1000">999</option>
+      </select>
+      <button style={{width: '70px', marginLeft: '10px', color: 'white', backgroundColor: 'cornflowerblue', border: 'cornflowerblue'}} onClick={this.seachProductbyPrice}>Apply</button>
     </div>
   </div>
   <div className="products-grid">
+  {cartmsg === true && (
+    <div className="addcart-msg">
+      <span style={{color: 'green'}}>Product Added To Cart Sucessfully!!</span>
+    </div>
+  )}
     <div className="product-sort">
-    <span style={{fontWeight: '600'}} >Sort:</span>
+    <span style={{fontWeight: '600'}} >Sort By:</span>
     <span onClick={this.priceLowToHigh} className={lowtohigh}>Price: Low to High</span>
     <span onClick={this.priceHighToLow} className={hightolow}>Price: High to Low</span>
+    <span onClick={this.discountFilter} className={discountby}>Disount</span>
     </div>
     {prodArr.map((items) => (
     <div className="product-card" key={items.id}>
@@ -147,8 +205,13 @@ return (
       </div>
       <div className="product-info">
         <h5>{items.name}</h5>
-        <h6>${items.price}.00</h6>
+        <div style={{marginBottom: '10px'}}>
+        <span style={{fontWeight: '500'}}>${items.price}.00</span>
+        <span style={{color: 'green', paddingLeft: '20px', fontWeight: '500'}}>{items.discount} % off</span>
+        </div>
+        <div style={{marginLeft: '3rem'}}>
         <button onClick={() => this.clickMe(items.id)} disabled={this.state.cartArr.findIndex(x => x.id === items.id) !== -1}>Add To Cart</button>
+        </div>
       </div>
     </div>
     ))}
@@ -157,7 +220,7 @@ return (
   )}
   {this.state.cart === true && (
     
-    <div style={{float: 'left', width: '100%', paddingTop: '25px'}}>
+    <div style={{float: 'left', width: '100%', paddingTop: '25px', minHeight: '600px'}}>
 
       <h4>SHOPPING CART</h4>
 
@@ -214,6 +277,9 @@ return (
 
     
   )}
+  <div className="copyright">
+    <span style={{color: '#fff'}}>Copyright</span>
+    </div>
 </div>
 
 );
