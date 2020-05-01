@@ -196,7 +196,7 @@ return (
     <span style={{fontWeight: '600'}} >Sort By:</span>
     <span onClick={this.priceLowToHigh} className={lowtohigh}>Price: Low to High</span>
     <span onClick={this.priceHighToLow} className={hightolow}>Price: High to Low</span>
-    <span onClick={this.discountFilter} className={discountby}>Disount</span>
+    <span onClick={this.discountFilter} className={discountby}>Discount</span>
     </div>
     {prodArr.map((items) => (
     <div className="product-card" key={items.id}>
