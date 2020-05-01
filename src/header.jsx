@@ -162,7 +162,7 @@ return (
     <input type="text" style={{float: 'right', padding: '5px', margin: '5px 0px'}} placeholder="search product" onChange={this.searchText} />
   </div>
   {this.state.home === true && (
-  <div>
+  <div style={{minHeight: '600px'}}>
   <div className="product-filter">
     <div className="filter-info">
       <h5>Filters</h5>
