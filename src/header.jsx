@@ -3,7 +3,7 @@ import './App.css';
 import star from './star.png';
 import cart from './cart.png';
 
-const imgUrl = `${'https://i.picsum.photos/id/'}_id_${'/200/200.jpg'}`;
+const imgUrl = `${'https://picsum.photos/id/'}_id_${'/200/200.jpg'}`;
 
 const Arr = [1,2,3,4,5,6,7,8,9,10,11,12];
 const ProductArr = [];
